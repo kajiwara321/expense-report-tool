@@ -1,12 +1,15 @@
 # Expense Report Tool
 
-経費精算の自動化ツール（v0.2.0）
+経費精算の自動化ツール（v0.3.0）
 
 ## 概要
 
 このツールは、経費データの入力、分類、集計を自動化し、見やすいレポートを生成します。OpenAI APIを利用して、入力された経費データを自動的に適切なカテゴリに分類し、集計レポートを作成します。
 
-**新機能**: OCRによる領収書画像からの経費データ抽出とExcelスプレッドシートへの出力機能を追加しました！
+**新機能**: 
+- OCRによる領収書画像からの経費データ抽出とExcelスプレッドシートへの出力機能
+- HEICファイル形式（iPhoneで撮影した画像）のサポート追加
+- 画像処理フローの改善（pending/processedディレクトリによる管理）
 
 ### 主な機能
 
@@ -15,8 +18,10 @@
 - 📊 見やすい経費レポートの生成
 - 🗾 日本語での入力に対応
 - 🔍 高額支出の自動検出
-- 📷 OCRによる領収書画像からのデータ抽出 **(New!)**
-- 📑 Excelスプレッドシートへの出力 **(New!)**
+- 📷 OCRによる領収書画像からのデータ抽出
+- 📑 Excelスプレッドシートへの出力
+- 📱 iPhoneで撮影したHEIC形式の画像に対応 **(New!)**
+- 🗂️ 画像ファイルの自動整理機能 **(New!)**
 
 ## インストール
 
@@ -41,16 +46,19 @@ cd expense-report-tool
 source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
-3. Tesseract OCRのインストール（OCR機能を使用する場合）：
+3. Tesseract OCRとHEICサポートのインストール：
 ```bash
 # macOS
 brew install tesseract tesseract-lang  # 日本語対応
+pip install pillow-heif  # HEICファイルサポート
 
 # Ubuntu
 sudo apt-get install tesseract-ocr tesseract-ocr-jpn
+pip install pillow-heif  # HEICファイルサポート
 
 # Windows
 # https://github.com/UB-Mannheim/tesseract/wiki からインストーラをダウンロード
+pip install pillow-heif  # HEICファイルサポート
 ```
 
 4. 環境変数の設定：
@@ -114,11 +122,13 @@ python expense_report_tool.py
 経費データを expenses.xlsx に出力しました
 ```
 
-### OCRモード（新機能）
+### OCRモード
 
-1. 単一画像の処理：
+1. 単一画像の処理（JPG, PNG, HEIC形式対応）：
 ```bash
 python expense_report_tool.py --ocr --image receipts/receipt1.jpg
+# HEICファイルも同様に処理可能
+python expense_report_tool.py --ocr --image receipts/receipt2.heic
 ```
 
 2. ディレクトリ内の全画像を処理：
@@ -146,12 +156,27 @@ python expense_report_tool.py --ocr --image-dir receipts/ --debug
 python expense_report_tool.py --help
 ```
 
+## 画像処理フロー
+
+1. 画像ファイルの配置
+   - `receipts/`ディレクトリに画像ファイルを配置
+
+2. 処理の実行
+   - 画像は自動的に`receipts/pending/`に移動
+   - OCR処理が実行される
+   - 処理済み画像は`receipts/processed/`に移動
+   - HEICファイルはJPEG形式に変換されて保存
+
 ## 開発ロードマップ
 
-### フェーズ1: OCR機能の強化 (Current)
+### フェーズ1: OCR機能の強化 (Completed)
 - ✅ 基本的なOCR機能の実装
 - ✅ 画像前処理の実装
 - ✅ スプレッドシート出力機能
+- ✅ HEICファイル形式のサポート
+- ✅ 画像ファイル管理の改善
+
+### フェーズ2: OCR精度向上 (Current)
 - ⬜ OCR精度の向上（機械学習モデルの活用）
 - ⬜ 複数フォーマットの領収書対応
 - ⬜ QRコード/バーコード読み取り対応
@@ -174,6 +199,7 @@ python expense_report_tool.py --help
 - 複雑なレイアウトの領収書は認識精度が低下する場合があります
 - 手書き文字の認識は不安定な場合があります
 - Tesseractのインストールが必要です
+- HEICファイルの処理には`pillow-heif`パッケージが必要です
 
 ## 貢献方法
 
