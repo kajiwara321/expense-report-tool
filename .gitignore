@@ -22,19 +22,23 @@ wheels/
 
 # Virtual Environment
 venv/
-ENV/
 env/
-.env
+ENV/
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-.DS_Store
 
 # Project specific
-*.log
-test_output/
-.coverage
-htmlcov/
+.env
+*.xlsx
+receipts/processed/*
+receipts/pending/*
+!receipts/processed/.gitkeep
+!receipts/pending/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
