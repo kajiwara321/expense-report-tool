@@ -1,10 +1,12 @@
 # Expense Report Tool
 
-経費精算の自動化ツール（v0.1.0）
+経費精算の自動化ツール（v0.2.0）
 
 ## 概要
 
 このツールは、経費データの入力、分類、集計を自動化し、見やすいレポートを生成します。OpenAI APIを利用して、入力された経費データを自動的に適切なカテゴリに分類し、集計レポートを作成します。
+
+**新機能**: OCRによる領収書画像からの経費データ抽出とExcelスプレッドシートへの出力機能を追加しました！
 
 ### 主な機能
 
@@ -13,6 +15,8 @@
 - 📊 見やすい経費レポートの生成
 - 🗾 日本語での入力に対応
 - 🔍 高額支出の自動検出
+- 📷 OCRによる領収書画像からのデータ抽出 **(New!)**
+- 📑 Excelスプレッドシートへの出力 **(New!)**
 
 ## インストール
 
@@ -21,23 +25,35 @@
 - Python 3.9以上
 - OpenAI APIキー
 - pip（Pythonパッケージマネージャー）
+- Tesseract OCR（OCR機能を使用する場合）
 
 ### セットアップ手順
 
 1. リポジトリのクローン：
 ```bash
-git clone https://github.com/[your-username]/expense-report-tool.git
+git clone https://github.com/kajiwara321/expense-report-tool.git
 cd expense-report-tool
 ```
 
 2. 仮想環境のセットアップ：
 ```bash
-python -m venv venv
+./setup.sh
 source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
 ```
 
-3. 環境変数の設定：
+3. Tesseract OCRのインストール（OCR機能を使用する場合）：
+```bash
+# macOS
+brew install tesseract tesseract-lang  # 日本語対応
+
+# Ubuntu
+sudo apt-get install tesseract-ocr tesseract-ocr-jpn
+
+# Windows
+# https://github.com/UB-Mannheim/tesseract/wiki からインストーラをダウンロード
+```
+
+4. 環境変数の設定：
 `.env`ファイルを作成し、以下の内容を設定：
 ```
 OPENAI_API_KEY=your-api-key-here
@@ -45,6 +61,8 @@ DEBUG=false  # デバッグ出力を有効にする場合は true
 ```
 
 ## 使用方法
+
+### 対話モード（従来の機能）
 
 1. プログラムの起動：
 ```bash
@@ -89,20 +107,73 @@ python expense_report_tool.py
 - その他の注意点: 特になし
 ```
 
+5. スプレッドシートへの出力（オプション）：
+```
+経費データをスプレッドシートに出力しますか？ (y/n): y
+出力ファイル名を入力してください（デフォルト: 自動生成）: expenses.xlsx
+経費データを expenses.xlsx に出力しました
+```
+
+### OCRモード（新機能）
+
+1. 単一画像の処理：
+```bash
+python expense_report_tool.py --ocr --image receipts/receipt1.jpg
+```
+
+2. ディレクトリ内の全画像を処理：
+```bash
+python expense_report_tool.py --ocr --image-dir receipts/
+```
+
+3. 出力ファイルの指定：
+```bash
+python expense_report_tool.py --ocr --image-dir receipts/ --output expenses.xlsx
+```
+
+4. 既存ファイルへの追記：
+```bash
+python expense_report_tool.py --ocr --image-dir receipts/ --output expenses.xlsx --append
+```
+
+5. デバッグモードの有効化：
+```bash
+python expense_report_tool.py --ocr --image-dir receipts/ --debug
+```
+
+6. ヘルプの表示：
+```bash
+python expense_report_tool.py --help
+```
+
 ## 開発ロードマップ
 
-### フェーズ1: OCR実装 (Next)
-- 領収書の画像からのデータ抽出
-- テキスト認識精度の向上
+### フェーズ1: OCR機能の強化 (Current)
+- ✅ 基本的なOCR機能の実装
+- ✅ 画像前処理の実装
+- ✅ スプレッドシート出力機能
+- ⬜ OCR精度の向上（機械学習モデルの活用）
+- ⬜ 複数フォーマットの領収書対応
+- ⬜ QRコード/バーコード読み取り対応
 
 ### フェーズ2: Web実装
 - Webインターフェースの開発
 - ユーザー認証システム
+- クラウドストレージ連携
+- ドラッグ&ドロップによる画像アップロード
 
 ### フェーズ3: 機能拡張
 - データベース連携
 - 承認ワークフロー
 - レポートのカスタマイズ
+- モバイルアプリ連携
+
+## 既知の制限事項
+
+- OCR機能は画像品質に大きく依存します
+- 複雑なレイアウトの領収書は認識精度が低下する場合があります
+- 手書き文字の認識は不安定な場合があります
+- Tesseractのインストールが必要です
 
 ## 貢献方法
 
