@@ -1,6 +1,5 @@
 openai>=1.66.2
 python-dotenv>=1.0.0
-openai-agents>=0.0.3
 pytest>=8.3.5
 pytest-asyncio>=0.25.3
 pytesseract>=0.3.10

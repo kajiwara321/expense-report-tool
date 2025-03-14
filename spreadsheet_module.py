@@ -305,16 +305,30 @@ class ExpenseSpreadsheet:
             start_row = last_row + 1
             total_amount = 0
             
-            # 既存の合計行を削除（存在する場合）
+            # 既存の合計行と空行を削除（存在する場合）
             if last_row > 1:
+                # 最後の有効なデータ行を見つける
+                valid_last_row = None
                 for row in range(last_row, 0, -1):
                     if sheet.cell(row=row, column=3).value == "合計":
-                        sheet.delete_rows(row)
+                        # 合計行以降を削除
+                        sheet.delete_rows(row, last_row - row + 1)
                         last_row = row - 1
                         break
+                    elif all(cell.value is not None for cell in sheet[row][0:4]):  # 最初の4列に値がある行
+                        valid_last_row = row
+                        break
+
+                # 最後の有効なデータ行以降の空行を削除
+                if valid_last_row:
+                    if valid_last_row < last_row:
+                        sheet.delete_rows(valid_last_row + 1, last_row - valid_last_row)
+                    last_row = valid_last_row
             
-            # 既存のデータの合計金額を計算
+            # 既存のデータの合計金額を計算（有効なデータ行のみ）
             for row in range(2, last_row + 1):
+                if not any(sheet.cell(row=row, column=i).value for i in range(1, 6)):
+                    continue  # 空行はスキップ
                 cell_value = sheet.cell(row=row, column=4).value
                 if isinstance(cell_value, (int, float)):
                     total_amount += cell_value
@@ -323,8 +337,12 @@ class ExpenseSpreadsheet:
             for i, expense in enumerate(expense_data_list, 1):
                 row = last_row + i  # 既存データの後から開始
                 
-                # No.
-                sheet.cell(row=row, column=1).value = last_row - 1 + i  # 既存のNo.の続きから
+                # データ行数をカウント（空行を除く）
+                data_rows = sum(1 for r in range(2, last_row + 1) 
+                              if any(sheet.cell(row=r, column=j).value for j in range(1, 6)))
+                
+                # No.（実際のデータ行数に基づいて計算）
+                sheet.cell(row=row, column=1).value = data_rows + i
                 
                 # 日付
                 sheet.cell(row=row, column=2).value = expense.get("date", "")
